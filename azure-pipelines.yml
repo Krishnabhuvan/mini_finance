@@ -1,0 +1,28 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+
+- checkout: self
+
+# Copy files to VM
+- task: CopyFilesOverSSH@0
+  inputs:
+    sshEndpoint: 'ubuntu-vm-ssh'
+    sourceFolder: '$(System.DefaultWorkingDirectory)'
+    contents: |
+      *
+    targetFolder: '/var/www/html'
+    cleanTargetFolder: true
+
+# Restart NGINX
+- task: SSH@0
+  inputs:
+    sshEndpoint: 'ubuntu-vm-ssh'
+    runOptions: 'commands'
+    commands: |
+      sudo systemctl restart nginx
+      sudo systemctl status nginx
