@@ -5,24 +5,21 @@ pool:
   name: Default
 
 steps:
-
 - checkout: self
 
-# Copy files to VM
-- task: CopyFilesOverSSH@0
-  inputs:
-    sshEndpoint: 'ubuntu-vm-ssh'
-    sourceFolder: '$(System.DefaultWorkingDirectory)'
-    contents: |
-      *
-    targetFolder: '/var/www/html'
-    cleanTargetFolder: true
+- script: |
+    echo "Current directory:"
+    pwd
+    echo "Listing repo files:"
+    ls -la
 
-# Restart NGINX
-- task: SSH@0
-  inputs:
-    sshEndpoint: 'ubuntu-vm-ssh'
-    runOptions: 'commands'
-    commands: |
-      sudo systemctl restart nginx
-      sudo systemctl status nginx
+    echo "Cleaning NGINX folder..."
+    sudo rm -rf /var/www/html/*
+
+    echo "Copying full project..."
+    sudo cp -r $(Build.SourcesDirectory)/* /var/www/html/
+
+    echo "Restarting NGINX..."
+    sudo systemctl restart nginx
+
+  displayName: Deploy Full Project to NGINX
